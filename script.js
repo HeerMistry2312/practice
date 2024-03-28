@@ -43,25 +43,32 @@ $(document).ready(function () {
   //submission
   $("#form").submit(function (e) {
     e.preventDefault();
-    let valid = validatePatient();
-    if (valid) {
-      let formData = {
-        name: $("#name").val(),
-        DOB: $("#DOB").val(),
-        gender: $('input[name="gender"]:checked').val(),
-        email: $("#email").val(),
-        contactNo: $("#contactNo").val(),
-        country: $("#country").val(),
-        state: $("#state").val(),
-        city: $("#city").val(),
-        appData: [],
-      };
-      patient.push(formData);
-      dataTable.row.add(formData).draw();
-      console.log(patient);
-      $("#form")[0].reset();
-      $("#popup").modal("hide");
-    }
+    // let valid = validatePatient();
+    //if (valid) {
+    var checkbox = [];
+    $('input[name="check"]:checked').each(function () {
+      checkbox.push($(this).val());
+    });
+
+    let formData = {
+      name: $("#name").val(),
+      DOB: $("#DOB").val(),
+      gender: $('input[name="gender"]:checked').val(),
+      check: checkbox,
+      email: $("#email").val(),
+      contactNo: $("#contactNo").val(),
+      country: $("#country").val(),
+      state: $("#state").val(),
+      city: $("#city").val(),
+      appData: [],
+    };
+
+    patient.push(formData);
+    dataTable.row.add(formData).draw();
+    console.log(patient);
+    $("#form")[0].reset();
+    $("#popup").modal("hide");
+    //}
   });
 
   //datatable
@@ -77,6 +84,7 @@ $(document).ready(function () {
       { data: "name" },
       { data: "DOB" },
       { data: "gender" },
+      { data: "check" },
       { data: "email" },
       { data: "contactNo" },
       { data: "country" },
@@ -164,7 +172,16 @@ $(document).ready(function () {
 
     $("#name").val(data.name);
     $("#DOB").val(data.DOB);
-    $("#gender").val(data.gender);
+    $('input[name="gender"]').filter('[value="' + data.gender + '"]').prop('checked', true);
+    $('input[name="check"]').prop('checked', false); // Uncheck all checkboxes first
+    if (data.check instanceof Array) {
+      data.check.forEach(function (value) {
+        $('input[name="check"][value="' + value + '"]').prop('checked', true);
+      });
+    } else {
+      $('input[name="check"][value="' + data.check + '"]').prop('checked', true);
+    }
+
     $("#email").val(data.email);
     $("#contactNo").val(data.contactNo);
     $("#country").val(data.country);
@@ -177,10 +194,15 @@ $(document).ready(function () {
       .off("submit")
       .on("submit", function (e) {
         e.preventDefault();
+        var checkbox = [];
+        $('input[name="check"]:checked').each(function () {
+          checkbox.push($(this).val());
+        });
         let upddateData = {
           name: $("#name").val(),
           DOB: $("#DOB").val(),
           gender: $('input[name="gender"]:checked').val(),
+          check: checkbox,
           email: $("#email").val(),
           contactNo: $("#contactNo").val(),
           country: $("#country").val(),
@@ -188,6 +210,8 @@ $(document).ready(function () {
           city: $("#city").val(),
           appData: [],
         };
+
+
         patient[index] = upddateData;
         dataTable.row(tr).data(upddateData).draw();
         $("#form")[0].reset();
@@ -209,51 +233,51 @@ $(document).ready(function () {
   });
 
   //validate patient form
-  function validatePatient() {
-    let name = $("#name").val();
-    let DOB = $("#DOB").val();
-    let gender = $('input[name="gender"]').val();
-    let email = $("#email").val();
-    let contactNo = $("#contactNo").val();
-    let country = $("#country").val();
-    let state = $("#state").val();
-    let city = $("#city").val();
-    //name
-    if (name == "") {
-      $("#namep").text("*Please fill the feild");
-      return false;
-    } else if (name.length < 2) {
-      $("#namep").text("*Your Name must have at least 2 letters");
-      return false;
-    } else if (!isNaN(name)) {
-      $("#namep").text("*Name must be characters only");
-      return false;
-    } else {
-      $("#namep").text("");
-    }
-    //DOB
-    if (DOB == "") {
-      $("#DOBp").text("*Please fill the feild");
-      return false;
-    } else {
-      $("#DOBp").text("");
-    }
-    //gender
-    /*for (var i = 0; i < gender.length; i++) {
-      if (!gender[i].checked) {
-        $("#genderp").text("*Please Select one gender option");
-        return false;
-      }
-      $("#genderp").text("");
-    }*/
-    //email
-    if (email == "") {
-      $("#emailp").text("*Please fill the feild");
-      return false;
-    }
-    if (email == "") {
-      $("#emailp").text("*Please fill the feild");
-      return false;
-    }
-  }
+  /* function validatePatient() {
+     let name = $("#name").val();
+     let DOB = $("#DOB").val();
+     let gender = $('input[name="gender"]').val();
+     let email = $("#email").val();
+     let contactNo = $("#contactNo").val();
+     let country = $("#country").val();
+     let state = $("#state").val();
+     let city = $("#city").val();
+     //name
+     if (name == "") {
+       $("#namep").text("*Please fill the feild");
+       return false;
+     } else if (name.length < 2) {
+       $("#namep").text("*Your Name must have at least 2 letters");
+       return false;
+     } else if (!isNaN(name)) {
+       $("#namep").text("*Name must be characters only");
+       return false;
+     } else {
+       $("#namep").text("");
+     }
+     //DOB
+     if (DOB == "") {
+       $("#DOBp").text("*Please fill the feild");
+       return false;
+     } else {
+       $("#DOBp").text("");
+     }
+     //gender
+     for (var i = 0; i < gender.length; i++) {
+       if (!gender[i].checked) {
+         $("#genderp").text("*Please Select one gender option");
+         return false;
+       }
+       $("#genderp").text("");
+     }
+     //email
+     /*if (email == "") {
+       $("#emailp").text("*Please fill the feild");
+       return false;
+     }
+     if (email == "") {
+       $("#emailp").text("*Please fill the feild");
+       return false;
+     }
+   }*/
 });
