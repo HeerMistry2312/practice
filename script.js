@@ -1,85 +1,96 @@
 $(document).ready(function () {
   let patient = [];
-  //popup
-  $(".open").click(function () {
+  $("#button1").click(function (e) {
+    e.preventDefault();
     $("#popup").modal("show");
   });
-  $(".close").click(function () {
-    $("#form")[0].reset();
+  $(".close").click(function (e) {
+    e.preventDefault();
     $("#popup").modal("hide");
   });
 
-  //dropdown
-  $("#country").change(function () {
+  $("#country").change(function (e) {
+    e.preventDefault();
     let country = $(this).val();
     let stateDrop = $("#state");
     stateDrop.empty();
     let states = [];
     if (country === "USA") {
-      states = ["New York", "California", "Texas"];
-    } else if (country === "Canada") {
-      states = ["Ontario", "Quebec", "British Columbia"];
+      states = ["a", "b", "c"];
+    }
+    if (country === "Canada") {
+      states = ["d", "e", "f"];
     }
     states.forEach(function (state) {
       stateDrop.append($("<option></option>").attr("value", state).text(state));
     });
   });
 
-  $("#state").change(function () {
+  $("#state").change(function (e) {
+    e.preventDefault();
     let state = $(this).val();
     let cityDrop = $("#city");
     cityDrop.empty();
     let cities = [];
-    if (state === "New York") {
-      cities = ["N", "Cal", "Te"];
-    } else if (state === "California") {
-      cities = ["On", "Qu", "B"];
+    if (state === "a") {
+      cities = ["a", "b", "c"];
+    }
+    if (state === "b") {
+      cities = ["d", "e", "f"];
+    }
+    if (state === "c") {
+      cities = ["g", "e", "f"];
+    }
+    if (state === "d") {
+      cities = ["h", "e", "f"];
+    }
+    if (state === "e") {
+      cities = ["i", "e", "f"];
+    }
+    if (state === "f") {
+      cities = ["j", "e", "f"];
     }
     cities.forEach(function (city) {
       cityDrop.append($("<option></option>").attr("value", city).text(city));
     });
   });
 
-  //submission
   $("#form").submit(function (e) {
     e.preventDefault();
-    // let valid = validatePatient();
-    //if (valid) {
-    var checkbox = [];
+    let valid = validate();
+    let checks = [];
     $('input[name="check"]:checked').each(function () {
-      checkbox.push($(this).val());
+      checks.push($(this).val());
     });
-
-    let formData = {
-      name: $("#name").val(),
-      DOB: $("#DOB").val(),
-      gender: $('input[name="gender"]:checked').val(),
-      check: checkbox,
-      email: $("#email").val(),
-      contactNo: $("#contactNo").val(),
-      country: $("#country").val(),
-      state: $("#state").val(),
-      city: $("#city").val(),
-      appData: [],
-    };
-
-    patient.push(formData);
-    dataTable.row.add(formData).draw();
-    console.log(patient);
-    $("#form")[0].reset();
-    $("#popup").modal("hide");
-    //}
+    if (valid) {
+      let data = {
+        name: $("#name").val(),
+        DOB: $("#DOB").val(),
+        gender: $('input[name="gender"]:checked').val(),
+        check: checks,
+        email: $("#email").val(),
+        contactNo: $("#contactNo").val(),
+        country: $("#country").val(),
+        state: $("#state").val(),
+        city: $("#city").val(),
+        appdata: [],
+      };
+      patient.push(data);
+      console.log(patient);
+      table.row.add(data).draw();
+      $("#form")[0].reset();
+      $("#popup").modal("hide");
+    }
   });
 
-  //datatable
-  let dataTable = $("#table").DataTable({
+  let table = $("#table").DataTable({
     data: patient,
     columns: [
       {
         className: "appointment",
         data: null,
         defaultContent:
-          '<i class="bx bx-list-plus text-success fs-2" style="cursor: pointer;"></i>',
+          '<button type="button" class="btn btn-success text-light">&times;</button>',
       },
       { data: "name" },
       { data: "DOB" },
@@ -92,42 +103,105 @@ $(document).ready(function () {
       { data: "city" },
       {
         data: null,
-        render: function (data, type, row) {
-          return '<button type="button" class="open1 btn btn-warning" id="addapp"><i class="bx bx-add-to-queue fs-4" ></i></button>&nbsp;<button button type = "button" class="btn btn-primary" id = "edit" ><i class="bx bxs-edit fs-4" ></i> </button >&nbsp;<button button type = "button" class="btn btn-danger" id = "delete" ><i class="bx bxs-coffee-togo fs-4"></i></button > ';
+        render: function () {
+          return '<button type="button" class="app btn btn-warning text-light">&times;</button><button type="button" class="edit btn btn-primary text-light">edit</button><button type="button" class="delete btn btn-danger text-light">del</button>';
         },
       },
     ],
   });
 
-  //appointment popup
-  $("#table tbody").on("click", ".open1", function () {
+  $("#table tbody").on("click", ".app", function () {
     $("#app").modal("show");
   });
   $(".close1").click(function () {
-    $("#form2")[0].reset();
     $("#app").modal("hide");
   });
 
-  //appointment form
   $("#form2").submit(function (e) {
     e.preventDefault();
-    let appdata = {
+    let app = {
       disease: $("#disease").val(),
       doctor: $("#doctor").val(),
-      madicine: $("#madicine").val(),
+      madicine: $("madicine").val(),
       Fupdate: $("#Fupdate").val(),
     };
     if (patient.length > 0) {
-      patient[patient.length - 1].appData.push(appdata);
+      patient[patient.length - 1].appdata.push(app);
     }
     $("#form2")[0].reset();
     $("#app").modal("hide");
   });
 
-  //Child Table
+  $("#table tbody").on("click", ".edit", function () {
+    let tr = $(this).closest("tr");
+    let index = table.row(tr).index();
+    let data = table.row(tr).data();
+
+    $("#name").val(data.name);
+    $("#DOB").val(data.DOB);
+    $('input[name="gender"][value="' + data.gender + '"]').prop(
+      "checked",
+      true
+    );
+    $('input[name="check"]').prop("checked", false);
+    if (data.check instanceof Array) {
+      data.check.forEach(function (val) {
+        $('input[name="check"][value="' + val + '"').prop("checked", true);
+      });
+    } else {
+      $('input[name="check"][value="' + data.check + '"').prop("checked", true);
+    }
+    $("#email").val(data.email);
+    $("#contactNo").val(data.contactNo);
+    $("#country").val(data.country);
+    $("#state").val(data.state);
+    $("#city").val(data.city);
+    $("#popup").modal("show");
+
+    $("#form")
+      .off("submit")
+      .on("submit", function (e) {
+        e.preventDefault();
+        let checks = [];
+        $('input[name="check"]:checked').each(function () {
+          checks.push($(this).val());
+        });
+        let valid = validate();
+        if (valid) {
+          let data = {
+            name: $("#name").val(),
+            DOB: $("#DOB").val(),
+            gender: $('input[name="gender"]:checked').val(),
+            check: checks,
+            email: $("#email").val(),
+            contactNo: $("#contactNo").val(),
+            country: $("#country").val(),
+            state: $("#state").val(),
+            city: $("#city").val(),
+            appdata: [],
+          };
+          patient[index] = data;
+          table.row(tr).data(data).draw();
+          $("#form")[0].reset();
+          $("#popup").modal("hide");
+        }
+      });
+  });
+  $("#table tbody").on("click", ".delete", function () {
+    let tr = $(this).parents("tr");
+    let index = table.row(tr).index();
+    let con = confirm("Are you sure you wANT TO DELETE IT?");
+    if (con) {
+      table.row(tr).remove().draw();
+      patient.splice(index, 1);
+      for (let i = index; i < patient.length; i++) {
+        table.row(i).data(patient[i]);
+      }
+    }
+  });
   $("#table tbody").on("click", "td.appointment", function () {
     var tr = $(this).closest("tr");
-    var row = dataTable.row(tr);
+    var row = table.row(tr);
 
     if (row.child.isShown()) {
       row.child.hide();
@@ -149,7 +223,7 @@ $(document).ready(function () {
       "</thead>" +
       "<tbody>";
 
-    for (const app of patient.appData) {
+    for (const app of patient.appdata) {
       tableHtml += `
       <tr>
         <td>${app.disease}</td>
@@ -164,120 +238,102 @@ $(document).ready(function () {
     return tableHtml;
   }
 
-  //edit detail
-  $("#table tbody").on("click", "#edit", function () {
-    let tr = $(this).closest("tr");
-    let index = dataTable.row(tr).index();
-    let data = dataTable.row(tr).data();
+  function validate() {
+    let name = $("#name").val();
+    let DOB = $("#DOB").val();
+    let gender = $('input[name="gender"]:checked').val();
+    let check = $('input[name="gender"]:checked').val();
+    let email = $("#email").val();
+    let contactNo = $("#contactNo").val();
+    let country = $("#country").val();
+    let state = $("#state").val();
+    let city = $("#city").val();
 
-    $("#name").val(data.name);
-    $("#DOB").val(data.DOB);
-    $('input[name="gender"]').filter('[value="' + data.gender + '"]').prop('checked', true);
-    $('input[name="check"]').prop('checked', false); // Uncheck all checkboxes first
-    if (data.check instanceof Array) {
-      data.check.forEach(function (value) {
-        $('input[name="check"][value="' + value + '"]').prop('checked', true);
-      });
+    if (name === "") {
+      $(".namee").text("Please Fillout this feild.");
+      return false;
+    }
+    if (name.length < 2) {
+      $(".namee").text("Name should be at least 2characters.");
+      return false;
+    }
+    if (!isNaN(name)) {
+      $(".namee").text("Name should be a character Type.");
+      return false;
     } else {
-      $('input[name="check"][value="' + data.check + '"]').prop('checked', true);
+      $(".namee").text("");
+    }
+    if (DOB === "") {
+      $(".dobe").text("Please Fillout this feild.");
+      return false;
+    }
+    var date = new Date();
+    var dobdate = new Date(DOB);
+    let age = date.getFullYear() - dobdate.getFullYear();
+    var monthDiff = date.getMonth() - dobdate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && date.getDate() < dobdate.getDate())
+    ) {
+      age--;
+    }
+    if (age < 18) {
+      $(".dobe").text("Your age must be 18.");
+      return false;
+    } else {
+      $(".dobe").text("");
     }
 
-    $("#email").val(data.email);
-    $("#contactNo").val(data.contactNo);
-    $("#country").val(data.country);
-    $("#state").val(data.state);
-    $("#city").val(data.city);
-
-    $("#popup").modal("show");
-
-    $("#form")
-      .off("submit")
-      .on("submit", function (e) {
-        e.preventDefault();
-        var checkbox = [];
-        $('input[name="check"]:checked').each(function () {
-          checkbox.push($(this).val());
-        });
-        let upddateData = {
-          name: $("#name").val(),
-          DOB: $("#DOB").val(),
-          gender: $('input[name="gender"]:checked').val(),
-          check: checkbox,
-          email: $("#email").val(),
-          contactNo: $("#contactNo").val(),
-          country: $("#country").val(),
-          state: $("#state").val(),
-          city: $("#city").val(),
-          appData: [],
-        };
-
-
-        patient[index] = upddateData;
-        dataTable.row(tr).data(upddateData).draw();
-        $("#form")[0].reset();
-        $("#popup").modal("hide");
-      });
-  });
-  //delete detail
-  $("#table tbody").on("click", "#delete", function () {
-    let row = $(this).parents("tr");
-    let index = dataTable.row(row).index();
-    let con = confirm("Are You Sure You Want To Delete This Row?");
-    if (con) {
-      dataTable.row(row).remove().draw();
-      patient.splice(index, 1);
-      for (let i = index; i < patient.length; i++) {
-        dataTable.row(i).data(patient[i]);
-      }
+    if (!gender) {
+      $(".gendere").text("Please select one feild.");
+      return false;
+    } else {
+      $(".gendere").text("");
     }
-  });
-
-  //validate patient form
-  /* function validatePatient() {
-     let name = $("#name").val();
-     let DOB = $("#DOB").val();
-     let gender = $('input[name="gender"]').val();
-     let email = $("#email").val();
-     let contactNo = $("#contactNo").val();
-     let country = $("#country").val();
-     let state = $("#state").val();
-     let city = $("#city").val();
-     //name
-     if (name == "") {
-       $("#namep").text("*Please fill the feild");
-       return false;
-     } else if (name.length < 2) {
-       $("#namep").text("*Your Name must have at least 2 letters");
-       return false;
-     } else if (!isNaN(name)) {
-       $("#namep").text("*Name must be characters only");
-       return false;
-     } else {
-       $("#namep").text("");
-     }
-     //DOB
-     if (DOB == "") {
-       $("#DOBp").text("*Please fill the feild");
-       return false;
-     } else {
-       $("#DOBp").text("");
-     }
-     //gender
-     for (var i = 0; i < gender.length; i++) {
-       if (!gender[i].checked) {
-         $("#genderp").text("*Please Select one gender option");
-         return false;
-       }
-       $("#genderp").text("");
-     }
-     //email
-     /*if (email == "") {
-       $("#emailp").text("*Please fill the feild");
-       return false;
-     }
-     if (email == "") {
-       $("#emailp").text("*Please fill the feild");
-       return false;
-     }
-   }*/
+    if (check.length === 0) {
+      $(".checke").text("Please select atleast one option.");
+      return false;
+    } else {
+      $(".checke").text("");
+    }
+    if (email === "") {
+      $(".emaile").text("Please Fillout this feild.");
+      return false;
+    } else {
+      $(".emaile").text("");
+    }
+    if (contactNo === "") {
+      $(".noe").text("Please Fillout this feild.");
+      return false;
+    }
+    if (isNaN(contactNo)) {
+      $(".noe").text("number should be in digits.");
+      return false;
+    }
+    if (contactNo.length !== 10) {
+      $(".noe").text("Phone number should of 10 digits");
+      return false;
+    } else {
+      $(".noe").text("");
+    }
+    if (country === "") {
+      $(".countrye").text("Please Select the option");
+      return false;
+    } else {
+      $(".countrye").text("");
+    }
+    if (state === "") {
+      $(".statee").text("Please Select the option");
+      return false;
+    } else {
+      $(".statee").text("");
+    }
+    if (city === "") {
+      $(".citye").text("Please Select the option");
+      return false;
+    } else {
+      $(".citye").text("");
+    }
+    return true;
+  }
 });
