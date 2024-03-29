@@ -241,8 +241,8 @@ $(document).ready(function () {
   function validate() {
     let name = $("#name").val();
     let DOB = $("#DOB").val();
-    let gender = $('input[name="gender"]:checked').val();
-    let check = $('input[name="gender"]:checked').val();
+    let gender = $('input[name="gender"]:checked');
+    let check = $('input[name="check"]:checked');
     let email = $("#email").val();
     let contactNo = $("#contactNo").val();
     let country = $("#country").val();
@@ -284,7 +284,7 @@ $(document).ready(function () {
       $(".dobe").text("");
     }
 
-    if (!gender) {
+    if (!gender.length) {
       $(".gendere").text("Please select one feild.");
       return false;
     } else {
